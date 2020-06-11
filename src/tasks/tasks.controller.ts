@@ -9,14 +9,17 @@ import {
   Query,
   ValidationPipe,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { GetTaskFilterDTO } from './dto/filter.dto';
 import { TaskStatusValidationPipe } from './pipes/task-status.pipes';
 import { Task } from './task.entity';
 import { TaskStatus } from './task-status.enum';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('tasks')
+@UseGuards(AuthGuard()) //Restriction to Routes
 export class TasksController {
   constructor(private taskService: TasksService) {}
 
@@ -37,11 +40,6 @@ export class TasksController {
     return this.taskService.deleteTaskById(id);
   }
 
-  // @Post()
-  // createTask(@Body() body): Promise<Task> {
-  //   console.log('bbod', body);
-
-  // }
   @Post() //Another way
   createTask(
     @Body('title') title: string,
