@@ -33,9 +33,10 @@ export class UserRepo extends Repository<User> {
   ): Promise<string> {
     const { username, password } = authCredentialsDto;
 
+    console.log(username, 'dasd');
     const user = await this.findOne({ username });
 
-    if (user && (await user.validatePass(password))) {
+    if (user && await user.validatePass(password)) {
       return user.username;
     } else {
       return null;

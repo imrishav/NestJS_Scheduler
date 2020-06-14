@@ -2,6 +2,7 @@ import { Repository, EntityRepository } from 'typeorm';
 import { Task } from './task.entity';
 import { TaskStatus } from './task-status.enum';
 import { GetTaskFilterDTO } from './dto/filter.dto';
+import { User } from 'src/auth/user.entity';
 
 @EntityRepository(Task)
 export class TaskRepo extends Repository<Task> {
@@ -24,14 +25,19 @@ export class TaskRepo extends Repository<Task> {
     return task;
   }
 
-  async createTask(title: string, description: string): Promise<Task> {
+  async createTask(
+    title: string,
+    description: string,
+    user: User,
+  ): Promise<Task> {
     const task = new Task();
 
     (task.title = title),
       (task.description = description),
-      (task.status = TaskStatus.OPEN);
+      ((task.status = TaskStatus.OPEN), (task.user = user));
 
     await task.save();
+    delete task.user;
     return task;
   }
 }

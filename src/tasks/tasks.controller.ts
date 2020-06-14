@@ -17,6 +17,8 @@ import { TaskStatusValidationPipe } from './pipes/task-status.pipes';
 import { Task } from './task.entity';
 import { TaskStatus } from './task-status.enum';
 import { AuthGuard } from '@nestjs/passport';
+import { User } from 'src/auth/user.entity';
+import { GetUser } from 'src/auth/get-user.decorator';
 
 @Controller('tasks')
 @UseGuards(AuthGuard()) //Restriction to Routes
@@ -44,8 +46,9 @@ export class TasksController {
   createTask(
     @Body('title') title: string,
     @Body('description') description: string,
+    @GetUser() user: User,
   ): Promise<Task> {
-    return this.taskService.createTask(title, description);
+    return this.taskService.createTask(title, description, user);
   }
 
   @Patch('/:id/status')
