@@ -10,6 +10,8 @@ import {
   ValidationPipe,
   ParseIntPipe,
   UseGuards,
+  HttpCode,
+  Logger,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { GetTaskFilterDTO } from './dto/filter.dto';
@@ -23,6 +25,7 @@ import { GetUser } from 'src/auth/get-user.decorator';
 @Controller('tasks')
 @UseGuards(AuthGuard()) //Restriction to Routes
 export class TasksController {
+  private logger = new Logger('TaskController');
   constructor(private taskService: TasksService) {}
 
   @Get()
@@ -30,17 +33,19 @@ export class TasksController {
     @Query(ValidationPipe) filterDto: GetTaskFilterDTO,
     @GetUser() user:User,
   ): Promise<Task[]> {
+    this.logger.verbose(`User "${user.username}" retrieving all Tasks`)
     return this.taskService.getTasks(filterDto, user);
   }
 
   @Get('/:id')
-  getTaskById(@Param('id', ParseIntPipe) id: number): Promise<Task> {
-    return this.taskService.getTaskById(id);
+  @HttpCode(405) 
+  getTaskById(@Param('id', ParseIntPipe) id: number, @GetUser() user: User): Promise<Task> {
+    return this.taskService.getTaskById(id, user);
   }
 
   @Delete('/:id')
-  deleteTask(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.taskService.deleteTaskById(id);
+  deleteTask(@Param('id', ParseIntPipe) id: number,@GetUser() user:User): Promise<void> {
+    return this.taskService.deleteTaskById(id,user);
   }
 
   @Post() //Another way
@@ -53,10 +58,12 @@ export class TasksController {
   }
 
   @Patch('/:id/status')
+
   updateStatus(
     @Param('id', ParseIntPipe) id: number,
     @Body('status', TaskStatusValidationPipe) status: TaskStatus,
+    @GetUser() user:User
   ): Promise<Task> {
-    return this.taskService.updateTaskStatus(id, status);
+    return this.taskService.updateTaskStatus(id, status, user);
   }
 }
